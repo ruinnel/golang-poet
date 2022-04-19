@@ -1,8 +1,10 @@
 package poet
 
 type Interface struct {
-	Name      string
-	Functions Functions
+	Name               string
+	ParameterizedTypes ParameterizedTypes
+	GenericTypes       GenericTypes
+	Functions          Functions
 }
 
 type Interfaces []Interface

@@ -1,11 +1,9 @@
 package poet
 
-import "reflect"
-
 type Argument struct {
 	VariableNumber bool
 	Name           string
-	Type           reflect.Type
+	Type           Type
 }
 
 type Arguments []Argument
@@ -21,7 +19,7 @@ func (a Arguments) NeedType(idx int) bool {
 	if len(a) > idx+1 {
 		this := a[idx]
 		next := a[idx+1]
-		return this.Type.Kind() != next.Type.Kind()
+		return this.Type.String() != next.Type.String()
 	}
 	return false
 }

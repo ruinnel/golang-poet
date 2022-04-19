@@ -1,11 +1,11 @@
 package poet
 
-type Import struct {
+type ImportSpec struct {
 	Package string
 	Alias   string
 }
 
-type Imports []Import
+type Imports []ImportSpec
 
 func (i Imports) String() string {
 	return GetTemplate().Import(i)

@@ -1,13 +1,13 @@
 package poet
 
 import (
-	"reflect"
+	"fmt"
 	"strings"
 )
 
 type Receiver struct {
 	Name string
-	Type reflect.Type
+	Type Type
 }
 
 type Statements []CodeBlock
@@ -15,18 +15,19 @@ type Statements []CodeBlock
 func (s Statements) String() string {
 	var buf []string
 	for _, code := range s {
-		buf = append(buf, code.String())
+		buf = append(buf, fmt.Sprintf("  %s", code.String()))
 	}
 	return strings.Join(buf, "\n")
 }
 
 type Function struct {
-	Interface  bool
-	Receiver   *Receiver
-	Name       string
-	Arguments  Arguments
-	Returns    Returns
-	Statements Statements
+	Interface          bool
+	Receiver           *Receiver
+	Name               string
+	ParameterizedTypes ParameterizedTypes
+	Arguments          Arguments
+	Returns            Returns
+	Statements         Statements
 }
 
 type Functions []Function

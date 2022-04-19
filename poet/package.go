@@ -1,8 +1,6 @@
 package poet
 
-type Package struct {
-	Name string
-}
+type Package string
 
 func (p Package) String() string {
 	return GetTemplate().Package(p)

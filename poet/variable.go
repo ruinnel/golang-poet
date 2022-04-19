@@ -1,11 +1,9 @@
 package poet
 
-import "reflect"
-
 type Variable struct {
 	StructField bool
 	Names       []string
-	Type        *reflect.Type
+	Type        Type
 	Value       Value
 }
 

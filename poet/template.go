@@ -6,20 +6,20 @@ import (
 	"text/template"
 )
 
-const packageTemplate = `package {{.Name}}`
+const packageTemplate = `package {{.}}`
 const singleImportTemplate = `import {{.Name}}`
 const multipleImportTemplate = `import (
-  {{range $index, $import := . -}}
-    {{- $import.Alias}} "{{$import.Package}}"
-  {{end -}}
+{{- range $index, $import := . }}
+  {{if $import.Alias}}{{printf "%s " $import.Alias}}{{end -}}
+  "{{$import.Package}}"{{end}}
 )
 `
 
 const singleConstantTemplate = `const {{.Name}} = {{.Value}}`
 const multipleConstantTemplate = `const (
-  {{range $index, $con := . -}}
-    {{- $con.Name}} = {{$con.Value}}
-  {{end -}}
+{{range $index, $con := . -}}
+  {{printf "  %s = %s\n" $con.Name $con.Value -}}
+{{- end -}}
 )`
 
 const singleArgumentTemplate = `{{.Name}} {{.Type}}`
@@ -31,46 +31,57 @@ const multipleReturnTemplate = `{{$returns := .}}({{- range $index, $ret := $ret
 const variableTemplate = `
 {{- if not .StructField}}var {{end -}}
 {{- range $index, $name := .Names -}}
-  {{- if $index}} ,{{end}}{{$name -}}
+  {{- if $index}}, {{end}}{{$name -}}
 {{- end -}}
-{{- if .Type}} {{.Type}}{{end -}}
+{{- if .Type}} {{.Type}}{{end}}
 {{- if not .StructField}}
   {{- if .Value}} = {{.Value}}{{end -}}
 {{- end -}}`
 
-const structTemplate = `type {{.Name}} struct {
-  {{.Variables}}
+const structTemplate = `type {{.Name}}{{.ParameterizedTypes}} struct {
+{{.Variables}}
 }`
 
 const functionTemplate = `
 {{- if not .Interface }}func {{end -}}
 {{- if .Receiver }}({{.Receiver.Name}} {{.Receiver.Type}}){{end -}}
-{{.Name}}({{.Arguments}}) {{.Returns -}}
+{{.Name}}{{.ParameterizedTypes}}({{.Arguments}}) {{.Returns -}}
 {{- if .Statements}} {
-  {{.Statements}}
+{{.Statements}}
 }
 {{end -}}
 `
 
 const interfaceTemplate = `
-type {{.Name}} interface {
+type {{.Name}}{{.ParameterizedTypes}} interface {
+  {{ .GenericTypes }}
   {{ .Functions }}
 }`
 
+const genericTypeTemplate = `{{- range $index, $type := . -}}
+  {{- if $index}} |{{end}}{{- if $type.Approximation}}~{{end}}{{$type.Type.Name -}}
+{{- end }}`
+
+const singleParameterizedTypeTemplate = `[{{.Symbol}} {{.Type}}]`
+const multipleParameterizedTypeTemplate = `[{{$types := .}}{{- range $index, $ret := $types -}}{{if $index}}, {{end}}{{.Symbol}} {{- if $types.NeedType $index }} {{.Type}}{{end}}{{end}}]`
+
 type Template struct {
-	packageTemplate          *template.Template
-	singleImportTemplate     *template.Template
-	multipleImportTemplate   *template.Template
-	singleConstantTemplate   *template.Template
-	multipleConstantTemplate *template.Template
-	singleArgumentTemplate   *template.Template
-	multipleArgumentTemplate *template.Template
-	singleReturnTemplate     *template.Template
-	multipleReturnTemplate   *template.Template
-	structTemplate           *template.Template
-	variableTemplate         *template.Template
-	functionTemplate         *template.Template
-	interfaceTemplate        *template.Template
+	packageTemplate                   *template.Template
+	singleImportTemplate              *template.Template
+	multipleImportTemplate            *template.Template
+	singleConstantTemplate            *template.Template
+	multipleConstantTemplate          *template.Template
+	singleArgumentTemplate            *template.Template
+	multipleArgumentTemplate          *template.Template
+	singleReturnTemplate              *template.Template
+	multipleReturnTemplate            *template.Template
+	structTemplate                    *template.Template
+	variableTemplate                  *template.Template
+	functionTemplate                  *template.Template
+	interfaceTemplate                 *template.Template
+	genericTypeTemplate               *template.Template
+	singleParameterizedTypeTemplate   *template.Template
+	multipleParameterizedTypeTemplate *template.Template
 }
 
 var instance *Template
@@ -154,20 +165,41 @@ func init() {
 		log.Panicf("interface template parse fail. %v", err)
 	}
 
+	genericTypeTmpl := template.New("genericType")
+	genericTypeTmpl, err = genericTypeTmpl.Parse(genericTypeTemplate)
+	if err != nil {
+		log.Panicf("genericType template parse fail. %v", err)
+	}
+
+	singleParameterizedTypeTmpl := template.New("singleParameterizedTypeTemplate")
+	singleParameterizedTypeTmpl, err = singleParameterizedTypeTmpl.Parse(singleParameterizedTypeTemplate)
+	if err != nil {
+		log.Panicf("single ParameterizedType template parse fail. %v", err)
+	}
+
+	multipleParameterizedTypeTmpl := template.New("multipleParameterizedTypeTemplate")
+	multipleParameterizedTypeTmpl, err = multipleParameterizedTypeTmpl.Parse(multipleParameterizedTypeTemplate)
+	if err != nil {
+		log.Panicf("multiple ParameterizedType template parse fail. %v", err)
+	}
+
 	instance = &Template{
-		packageTemplate:          packageTmpl,
-		singleImportTemplate:     singleImportTmpl,
-		multipleImportTemplate:   multipleImportTmpl,
-		singleConstantTemplate:   singleConstantTmpl,
-		multipleConstantTemplate: multipleConstantTmpl,
-		singleArgumentTemplate:   singleArgumentTmpl,
-		multipleArgumentTemplate: multipleArgumentTmpl,
-		singleReturnTemplate:     singleReturnTmpl,
-		multipleReturnTemplate:   multipleReturnTmpl,
-		structTemplate:           structTmpl,
-		variableTemplate:         variableTmpl,
-		functionTemplate:         functionTmpl,
-		interfaceTemplate:        interfaceTmpl,
+		packageTemplate:                   packageTmpl,
+		singleImportTemplate:              singleImportTmpl,
+		multipleImportTemplate:            multipleImportTmpl,
+		singleConstantTemplate:            singleConstantTmpl,
+		multipleConstantTemplate:          multipleConstantTmpl,
+		singleArgumentTemplate:            singleArgumentTmpl,
+		multipleArgumentTemplate:          multipleArgumentTmpl,
+		singleReturnTemplate:              singleReturnTmpl,
+		multipleReturnTemplate:            multipleReturnTmpl,
+		structTemplate:                    structTmpl,
+		variableTemplate:                  variableTmpl,
+		functionTemplate:                  functionTmpl,
+		interfaceTemplate:                 interfaceTmpl,
+		genericTypeTemplate:               genericTypeTmpl,
+		singleParameterizedTypeTemplate:   singleParameterizedTypeTmpl,
+		multipleParameterizedTypeTemplate: multipleParameterizedTypeTmpl,
 	}
 }
 
@@ -177,7 +209,7 @@ func GetTemplate() *Template {
 
 func (t Template) Package(pkg Package) string {
 	code := bytes.NewBufferString("")
-	err := t.packageTemplate.Execute(code, pkg)
+	err := t.packageTemplate.Execute(code, string(pkg))
 	if err != nil {
 		log.Panicf("package template execute fail. %v", err)
 	}
@@ -259,12 +291,17 @@ func (t Template) Struct(structs Structs) string {
 
 func (t Template) Variable(vars Variables) string {
 	code := bytes.NewBufferString("")
-	for _, v := range vars {
+	for idx, v := range vars {
+		if v.StructField {
+			code.WriteString("  ")
+		}
 		err := t.variableTemplate.Execute(code, v)
 		if err != nil {
 			log.Panicf("variable template execute fail. %v", err)
 		}
-		code.WriteString("\n")
+		if idx < len(vars)-1 {
+			code.WriteString("\n")
+		}
 	}
 
 	return code.String()
@@ -289,6 +326,31 @@ func (t Template) Interface(ins Interfaces) string {
 		if err != nil {
 			log.Panicf("interface template execute fail. %v", err)
 		}
+	}
+
+	return code.String()
+}
+
+func (t Template) GenericType(genericTypes GenericTypes) string {
+	code := bytes.NewBufferString("")
+	err := t.genericTypeTemplate.Execute(code, genericTypes)
+	if err != nil {
+		log.Panicf("genericType template execute fail. %v", err)
+	}
+
+	return code.String()
+}
+
+func (t Template) ParameterizedType(types ParameterizedTypes) string {
+	code := bytes.NewBufferString("")
+	var err error
+	if len(types) == 1 {
+		err = t.singleParameterizedTypeTemplate.Execute(code, types[0])
+	} else if len(types) > 1 {
+		err = t.multipleParameterizedTypeTemplate.Execute(code, types)
+	}
+	if err != nil {
+		log.Panicf("parameterizedType template execute fail. %v", err)
 	}
 
 	return code.String()
