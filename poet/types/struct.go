@@ -1,9 +1,9 @@
-package poet
+package types
 
 type Struct struct {
 	Name               string
 	ParameterizedTypes ParameterizedTypes
-	Variables          Variables
+	Fields             StructFields
 }
 
 type Structs []Struct

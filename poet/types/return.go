@@ -1,6 +1,8 @@
-package poet
+package types
 
-import "reflect"
+import (
+	"reflect"
+)
 
 type Return struct {
 	Name string

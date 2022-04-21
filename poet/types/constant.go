@@ -1,4 +1,4 @@
-package poet
+package types
 
 type Constant struct {
 	Name  string

@@ -1,10 +1,9 @@
-package poet
+package types
 
 type Variable struct {
-	StructField bool
-	Names       []string
-	Type        Type
-	Value       Value
+	Names []string
+	Type  Type
+	Value Value
 }
 
 type Variables []Variable

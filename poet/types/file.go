@@ -1,4 +1,4 @@
-package poet
+package types
 
 import (
 	"go/format"

@@ -1,4 +1,4 @@
-package poet
+package types
 
 import (
 	"bytes"
@@ -28,18 +28,24 @@ const multipleArgumentTemplate = `{{$args := .}}{{- range $index, $ret := $args 
 const singleReturnTemplate = `{{if .Name}}({{.Name}}{{end}} {{.Type}}{{if .Name}}){{end}}`
 const multipleReturnTemplate = `{{$returns := .}}({{- range $index, $ret := $returns -}}{{if $index}}, {{end}}{{.Name}} {{- if $returns.NeedType $index }} {{.Type}}{{end}}{{end}})`
 
-const variableTemplate = `
-{{- if not .StructField}}var {{end -}}
-{{- range $index, $name := .Names -}}
-  {{- if $index}}, {{end}}{{$name -}}
-{{- end -}}
+const variableTemplate = `var {{ range $index, $name := .Names -}}
+{{- if $index}}, {{end}}{{$name -}}{{- end -}}
 {{- if .Type}} {{.Type}}{{end}}
-{{- if not .StructField}}
-  {{- if .Value}} = {{.Value}}{{end -}}
-{{- end -}}`
+{{- if .Value}} = {{.Value}}{{end -}}
+`
+
+const structTagTemplate = "`" + `
+{{- range $index, $tag := . -}}
+{{if $index}} {{end}}{{$tag.Name}}:"{{$tag.Parameters}}"
+{{- end -}}
+` + "`"
+
+const structFieldTemplate = `
+{{- .Name}} {{- if .Type}} {{.Type}}{{end}}{{if .Tags}} {{.Tags}}{{end}}
+`
 
 const structTemplate = `type {{.Name}}{{.ParameterizedTypes}} struct {
-{{.Variables}}
+{{.Fields}}
 }`
 
 const functionTemplate = `
@@ -75,6 +81,8 @@ type Template struct {
 	multipleArgumentTemplate          *template.Template
 	singleReturnTemplate              *template.Template
 	multipleReturnTemplate            *template.Template
+	structTagTemplate                 *template.Template
+	structFieldTemplate               *template.Template
 	structTemplate                    *template.Template
 	variableTemplate                  *template.Template
 	functionTemplate                  *template.Template
@@ -141,6 +149,18 @@ func init() {
 		log.Panicf("multiple return template parse fail. %v", err)
 	}
 
+	structTagTmpl := template.New("structTag")
+	structTagTmpl, err = structTagTmpl.Parse(structTagTemplate)
+	if err != nil {
+		log.Panicf("struct tag template parse fail. %v", err)
+	}
+
+	structFieldTmpl := template.New("structField")
+	structFieldTmpl, err = structFieldTmpl.Parse(structFieldTemplate)
+	if err != nil {
+		log.Panicf("struct field template parse fail. %v", err)
+	}
+
 	structTmpl := template.New("struct")
 	structTmpl, err = structTmpl.Parse(structTemplate)
 	if err != nil {
@@ -193,6 +213,8 @@ func init() {
 		multipleArgumentTemplate:          multipleArgumentTmpl,
 		singleReturnTemplate:              singleReturnTmpl,
 		multipleReturnTemplate:            multipleReturnTmpl,
+		structTagTemplate:                 structTagTmpl,
+		structFieldTemplate:               structFieldTmpl,
 		structTemplate:                    structTmpl,
 		variableTemplate:                  variableTmpl,
 		functionTemplate:                  functionTmpl,
@@ -277,6 +299,29 @@ func (t Template) Return(returns Returns) string {
 	return code.String()
 }
 
+func (t Template) StructTag(tags StructTags) string {
+	code := bytes.NewBufferString("")
+	err := t.structTagTemplate.Execute(code, tags)
+	if err != nil {
+		log.Panicf("struct tag template execute fail. %v", err)
+	}
+
+	return code.String()
+}
+
+func (t Template) StructField(fields StructFields) string {
+	code := bytes.NewBufferString("")
+	for _, field := range fields {
+		code.WriteString("  ")
+		err := t.structFieldTemplate.Execute(code, field)
+		if err != nil {
+			log.Panicf("struct field template execute fail. %v", err)
+		}
+	}
+
+	return code.String()
+}
+
 func (t Template) Struct(structs Structs) string {
 	code := bytes.NewBufferString("")
 	for _, st := range structs {
@@ -292,9 +337,6 @@ func (t Template) Struct(structs Structs) string {
 func (t Template) Variable(vars Variables) string {
 	code := bytes.NewBufferString("")
 	for idx, v := range vars {
-		if v.StructField {
-			code.WriteString("  ")
-		}
 		err := t.variableTemplate.Execute(code, v)
 		if err != nil {
 			log.Panicf("variable template execute fail. %v", err)
