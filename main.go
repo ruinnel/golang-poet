@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/ruinnel/golang-poet/poet/builder"
 	"github.com/ruinnel/golang-poet/poet/types"
 	"log"
 	"reflect"
@@ -12,17 +13,27 @@ func main() {
 	stringType := reflect.TypeOf("")
 	structName := "TestStruct"
 
-	file := types.NewFileSpec("./.out/test.go")
+	file := builder.NewFile("./.out/test.go")
 
-	file.AddImport(types.ImportSpec{Package: "fmt"})
-	file.AddImport(types.ImportSpec{Package: "github.com/ruinnel/go-poet", Alias: "poet"})
+	importBuilder := builder.NewImportBuilder()
+	importBuilder.AddImport("fmt").
+		AddImport("github.com/ruinnel/go-poet", "poet")
 
-	constants := types.Constants{
-		types.Constant{Name: "MaxValue", Value: types.Value{Value: 100}},
-		types.Constant{Name: "MinValue", Value: types.Value{Value: 1 + 1i}},
-		types.Constant{Name: "DefaultName", Value: types.Value{Value: "test"}},
-		types.Constant{Name: "DefaultExp", Value: types.Value{Value: types.Expression("1 + 1")}},
-	}
+	file.WithImports(importBuilder)
+
+	constantBuilder := builder.NewConstantBuilder()
+	constantBuilder.AddConstant("MaxValue", types.Value{Value: 199}).
+		AddConstant("MinValue", types.Value{Value: 1 + 1i}).
+		AddConstant("DefaultName", types.Value{Value: "test"}).
+		AddConstant("DefaultExp", types.Value{Value: types.Expression("1 + 1")})
+
+	file.WithConstants(constantBuilder)
+	//constants := types.Constants{
+	//	types.Constant{Name: "MaxValue", Value: types.Value{Value: 100}},
+	//	types.Constant{Name: "MinValue", Value: types.Value{Value: 1 + 1i}},
+	//	types.Constant{Name: "DefaultName", Value: types.Value{Value: "test"}},
+	//	types.Constant{Name: "DefaultExp", Value: types.Value{Value: types.Expression("1 + 1")}},
+	//}
 
 	genericType1 := types.ParameterizedType{Symbol: "T1", Approximation: false, Type: reflect.TypeOf(1.0)}
 	interfaces := types.Interfaces{
@@ -101,7 +112,7 @@ func main() {
 	}
 
 	file.
-		WithConstants(constants).
+		//WithConstants(constants).
 		WithInterfaces(interfaces).
 		WithStructs(structs).
 		WithVariables(variables).
