@@ -8,8 +8,12 @@ type Argument struct {
 
 type Arguments []Argument
 
-func (a Arguments) String() string {
+func (a Argument) String() string {
 	return GetTemplate().Argument(a)
+}
+
+func (a Arguments) String() string {
+	return GetTemplate().Arguments(a)
 }
 
 func (a Arguments) NeedType(idx int) bool {

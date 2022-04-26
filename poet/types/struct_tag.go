@@ -29,5 +29,5 @@ func (p Parameters) String() string {
 }
 
 func (v StructTags) String() string {
-	return GetTemplate().StructTag(v)
+	return GetTemplate().StructTags(v)
 }

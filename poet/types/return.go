@@ -11,8 +11,12 @@ type Return struct {
 
 type Returns []Return
 
-func (r Returns) String() string {
+func (r Return) String() string {
 	return GetTemplate().Return(r)
+}
+
+func (r Returns) String() string {
+	return GetTemplate().Returns(r)
 }
 
 func (r Returns) NeedType(idx int) bool {

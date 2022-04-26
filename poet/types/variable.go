@@ -8,6 +8,10 @@ type Variable struct {
 
 type Variables []Variable
 
-func (v Variables) String() string {
+func (v Variable) String() string {
 	return GetTemplate().Variable(v)
+}
+
+func (v Variables) String() string {
+	return GetTemplate().Variables(v)
 }

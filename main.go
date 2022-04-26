@@ -28,12 +28,6 @@ func main() {
 		AddConstant("DefaultExp", types.Value{Value: types.Expression("1 + 1")})
 
 	file.WithConstants(constantBuilder)
-	//constants := types.Constants{
-	//	types.Constant{Name: "MaxValue", Value: types.Value{Value: 100}},
-	//	types.Constant{Name: "MinValue", Value: types.Value{Value: 1 + 1i}},
-	//	types.Constant{Name: "DefaultName", Value: types.Value{Value: "test"}},
-	//	types.Constant{Name: "DefaultExp", Value: types.Value{Value: types.Expression("1 + 1")}},
-	//}
 
 	genericType1 := types.ParameterizedType{Symbol: "T1", Approximation: false, Type: reflect.TypeOf(1.0)}
 	interfaces := types.Interfaces{
@@ -50,7 +44,7 @@ func main() {
 					Receiver:  nil,
 					Name:      "testFunc",
 					Arguments: types.Arguments{
-						types.Argument{Name: "arg1", Type: genericType1},
+						types.Argument{Name: "arg1", Type: genericType1.ToType()},
 						types.Argument{Name: "arg2", Type: stringType},
 						types.Argument{Name: "arg3", Type: intType},
 						types.Argument{Name: "arg4", Type: intType},
@@ -73,7 +67,7 @@ func main() {
 			Fields: types.StructFields{
 				types.StructField{
 					Name: "a",
-					Type: genericType1,
+					Type: genericType1.ToType(),
 					Tags: types.StructTags{
 						{Name: "tag1", Parameters: map[string]string{"param": "value", "param2": ""}},
 						{Name: "tag2", Parameters: map[string]string{"param": "value", "param2": ""}},

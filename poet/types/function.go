@@ -32,6 +32,10 @@ type Function struct {
 
 type Functions []Function
 
-func (f Functions) String() string {
+func (f Function) String() string {
 	return GetTemplate().Function(f)
+}
+
+func (f Functions) String() string {
+	return GetTemplate().Functions(f)
 }

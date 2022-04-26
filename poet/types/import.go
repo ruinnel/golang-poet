@@ -7,6 +7,10 @@ type Import struct {
 
 type Imports []Import
 
-func (i Imports) String() string {
+func (i Import) String() string {
 	return GetTemplate().Import(i)
+}
+
+func (i Imports) String() string {
+	return GetTemplate().Imports(i)
 }

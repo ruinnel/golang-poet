@@ -10,14 +10,18 @@ type ParameterizedType struct {
 	Type          reflect.Type
 }
 
-func (p ParameterizedType) String() string {
-	return p.Symbol
-}
-
 type ParameterizedTypes []ParameterizedType
 
-func (p ParameterizedTypes) String() string {
+func (p ParameterizedType) ToType() Type {
+	return TypeName(p.Symbol)
+}
+
+func (p ParameterizedType) String() string {
 	return GetTemplate().ParameterizedType(p)
+}
+
+func (p ParameterizedTypes) String() string {
+	return GetTemplate().ParameterizedTypes(p)
 }
 
 func (p ParameterizedTypes) NeedType(idx int) bool {

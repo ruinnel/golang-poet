@@ -8,6 +8,10 @@ type Struct struct {
 
 type Structs []Struct
 
-func (s Structs) String() string {
+func (s Struct) String() string {
 	return GetTemplate().Struct(s)
+}
+
+func (s Structs) String() string {
+	return GetTemplate().Structs(s)
 }

@@ -239,13 +239,23 @@ func (t Template) Package(pkg Package) string {
 	return code.String()
 }
 
-func (t Template) Import(imp Imports) string {
+func (t Template) Import(imp Import) string {
+	code := bytes.NewBufferString("")
+	err := t.singleImportTemplate.Execute(code, imp)
+	if err != nil {
+		log.Panicf("import template execute fail. %v", err)
+	}
+
+	return code.String()
+}
+
+func (t Template) Imports(imps Imports) string {
 	code := bytes.NewBufferString("")
 	var err error
-	if len(imp) == 1 {
-		err = t.singleImportTemplate.Execute(code, imp[0])
-	} else if len(imp) > 1 {
-		err = t.multipleImportTemplate.Execute(code, imp)
+	if len(imps) == 1 {
+		err = t.singleImportTemplate.Execute(code, imps[0])
+	} else if len(imps) > 1 {
+		err = t.multipleImportTemplate.Execute(code, imps)
 	}
 	if err != nil {
 		log.Panicf("import template execute fail. %v", err)
@@ -254,7 +264,17 @@ func (t Template) Import(imp Imports) string {
 	return code.String()
 }
 
-func (t Template) Constant(cons Constants) string {
+func (t Template) Constant(con Constant) string {
+	code := bytes.NewBufferString("")
+	err := t.singleConstantTemplate.Execute(code, con)
+	if err != nil {
+		log.Panicf("constant template execute fail. %v", err)
+	}
+
+	return code.String()
+}
+
+func (t Template) Constants(cons Constants) string {
 	code := bytes.NewBufferString("")
 	var err error
 	if len(cons) == 1 {
@@ -269,7 +289,17 @@ func (t Template) Constant(cons Constants) string {
 	return code.String()
 }
 
-func (t Template) Argument(args Arguments) string {
+func (t Template) Argument(arg Argument) string {
+	code := bytes.NewBufferString("")
+	err := t.singleArgumentTemplate.Execute(code, arg)
+	if err != nil {
+		log.Panicf("argument template execute fail. %v", err)
+	}
+
+	return code.String()
+}
+
+func (t Template) Arguments(args Arguments) string {
 	code := bytes.NewBufferString("")
 	var err error
 	if len(args) == 1 {
@@ -284,7 +314,17 @@ func (t Template) Argument(args Arguments) string {
 	return code.String()
 }
 
-func (t Template) Return(returns Returns) string {
+func (t Template) Return(ret Return) string {
+	code := bytes.NewBufferString("")
+	err := t.singleReturnTemplate.Execute(code, ret)
+	if err != nil {
+		log.Panicf("return template execute fail. %v", err)
+	}
+
+	return code.String()
+}
+
+func (t Template) Returns(returns Returns) string {
 	code := bytes.NewBufferString("")
 	var err error
 	if len(returns) == 1 {
@@ -299,7 +339,7 @@ func (t Template) Return(returns Returns) string {
 	return code.String()
 }
 
-func (t Template) StructTag(tags StructTags) string {
+func (t Template) StructTags(tags StructTags) string {
 	code := bytes.NewBufferString("")
 	err := t.structTagTemplate.Execute(code, tags)
 	if err != nil {
@@ -309,7 +349,18 @@ func (t Template) StructTag(tags StructTags) string {
 	return code.String()
 }
 
-func (t Template) StructField(fields StructFields) string {
+func (t Template) StructField(field StructField) string {
+	code := bytes.NewBufferString("")
+	code.WriteString("  ")
+	err := t.structFieldTemplate.Execute(code, field)
+	if err != nil {
+		log.Panicf("struct field template execute fail. %v", err)
+	}
+
+	return code.String()
+}
+
+func (t Template) StructFields(fields StructFields) string {
 	code := bytes.NewBufferString("")
 	for _, field := range fields {
 		code.WriteString("  ")
@@ -322,7 +373,17 @@ func (t Template) StructField(fields StructFields) string {
 	return code.String()
 }
 
-func (t Template) Struct(structs Structs) string {
+func (t Template) Struct(st Struct) string {
+	code := bytes.NewBufferString("")
+	err := t.structTemplate.Execute(code, st)
+	if err != nil {
+		log.Panicf("struct template execute fail. %v", err)
+	}
+
+	return code.String()
+}
+
+func (t Template) Structs(structs Structs) string {
 	code := bytes.NewBufferString("")
 	for _, st := range structs {
 		err := t.structTemplate.Execute(code, st)
@@ -334,7 +395,18 @@ func (t Template) Struct(structs Structs) string {
 	return code.String()
 }
 
-func (t Template) Variable(vars Variables) string {
+func (t Template) Variable(v Variable) string {
+	code := bytes.NewBufferString("")
+	err := t.variableTemplate.Execute(code, v)
+	if err != nil {
+		log.Panicf("variable template execute fail. %v", err)
+	}
+	code.WriteString("\n")
+
+	return code.String()
+}
+
+func (t Template) Variables(vars Variables) string {
 	code := bytes.NewBufferString("")
 	for idx, v := range vars {
 		err := t.variableTemplate.Execute(code, v)
@@ -349,7 +421,17 @@ func (t Template) Variable(vars Variables) string {
 	return code.String()
 }
 
-func (t Template) Function(funs Functions) string {
+func (t Template) Function(fun Function) string {
+	code := bytes.NewBufferString("")
+	err := t.functionTemplate.Execute(code, fun)
+	if err != nil {
+		log.Panicf("function template execute fail. %v", err)
+	}
+
+	return code.String()
+}
+
+func (t Template) Functions(funs Functions) string {
 	code := bytes.NewBufferString("")
 	for _, fun := range funs {
 		err := t.functionTemplate.Execute(code, fun)
@@ -361,7 +443,17 @@ func (t Template) Function(funs Functions) string {
 	return code.String()
 }
 
-func (t Template) Interface(ins Interfaces) string {
+func (t Template) Interface(in Interface) string {
+	code := bytes.NewBufferString("")
+	err := t.interfaceTemplate.Execute(code, in)
+	if err != nil {
+		log.Panicf("interface template execute fail. %v", err)
+	}
+
+	return code.String()
+}
+
+func (t Template) Interfaces(ins Interfaces) string {
 	code := bytes.NewBufferString("")
 	for _, in := range ins {
 		err := t.interfaceTemplate.Execute(code, in)
@@ -373,7 +465,7 @@ func (t Template) Interface(ins Interfaces) string {
 	return code.String()
 }
 
-func (t Template) GenericType(genericTypes GenericTypes) string {
+func (t Template) GenericTypes(genericTypes GenericTypes) string {
 	code := bytes.NewBufferString("")
 	err := t.genericTypeTemplate.Execute(code, genericTypes)
 	if err != nil {
@@ -383,7 +475,17 @@ func (t Template) GenericType(genericTypes GenericTypes) string {
 	return code.String()
 }
 
-func (t Template) ParameterizedType(types ParameterizedTypes) string {
+func (t Template) ParameterizedType(tp ParameterizedType) string {
+	code := bytes.NewBufferString("")
+	err := t.singleParameterizedTypeTemplate.Execute(code, tp)
+	if err != nil {
+		log.Panicf("parameterizedType template execute fail. %v", err)
+	}
+
+	return code.String()
+}
+
+func (t Template) ParameterizedTypes(types ParameterizedTypes) string {
 	code := bytes.NewBufferString("")
 	var err error
 	if len(types) == 1 {

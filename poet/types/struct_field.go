@@ -8,6 +8,10 @@ type StructField struct {
 
 type StructFields []StructField
 
-func (v StructFields) String() string {
+func (v StructField) String() string {
 	return GetTemplate().StructField(v)
+}
+
+func (v StructFields) String() string {
+	return GetTemplate().StructFields(v)
 }

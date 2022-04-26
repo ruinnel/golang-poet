@@ -9,6 +9,10 @@ type Interface struct {
 
 type Interfaces []Interface
 
-func (i Interfaces) String() string {
+func (i Interface) String() string {
 	return GetTemplate().Interface(i)
+}
+
+func (i Interfaces) String() string {
+	return GetTemplate().Interfaces(i)
 }

@@ -12,5 +12,5 @@ type GenericType struct {
 type GenericTypes []GenericType
 
 func (g GenericTypes) String() string {
-	return GetTemplate().GenericType(g)
+	return GetTemplate().GenericTypes(g)
 }
